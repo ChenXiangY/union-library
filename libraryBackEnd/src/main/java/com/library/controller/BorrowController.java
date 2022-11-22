@@ -79,8 +79,15 @@ public class BorrowController {
     }
     @RequestMapping("getAllBorrowStatus")
     public HashMap<String, Object> getAllBorrowStatus(@RequestBody HashMap<Object,Object> queryParam){
+//        设置分页
         Page<BorrowWithUser> page = PageHelper.startPage((Integer) queryParam.get("current"), (Integer) queryParam.get("pageSize"), true);
+//        设置按借阅开始时间递减
+
         List<BorrowWithUser> borrowWithUsers = this.borrowMapper.getBorrowWithUser();
+        Iterator<BorrowWithUser> iterator = borrowWithUsers.iterator();
+        while(iterator.hasNext()){
+            System.out.println(iterator.next().toString());
+        }
         HashMap<String,Object> result = new HashMap<String,Object>();
         long total = page.getTotal();
         result.put("data",borrowWithUsers);
@@ -104,4 +111,58 @@ public class BorrowController {
         criteria1.andIn("id",borrowersId);
         return this.userMapper.selectByExample(example1);
     }
+
+//    随机生成Borrow记录，添加一条完整的，1000条
+    public void addBorrow(){
+        Borrow borrow = new Borrow();
+        Random r = new Random();
+        borrow.setBorrowedBookId(r.nextInt(2787)+2);
+        borrow.setBorrowerId(r.nextInt(62)+4);
+//        生成随机年数
+        Integer randomYear = r.nextInt(2)+2021;
+//        生成随机月数
+        System.out.println("randomyear  = " + (String.valueOf(randomYear)));
+        Integer randomMonth;
+        if(randomYear.compareTo(2021)==0) {
+            randomMonth = r.nextInt(5) + 7;
+        }else{
+            randomMonth = r.nextInt(10)+1;
+        }
+//        根据月数生成随机天数
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(randomYear.intValue(),randomMonth.intValue(),1);
+        calendar.roll(Calendar.DATE,-1);
+        int day = calendar.get(Calendar.DATE);
+        int randomDate=1;
+        if(randomMonth.compareTo(10)==0){
+        randomDate = r.nextInt(21)+1;
+        }else{
+            randomDate = r.nextInt(day+1)+1;
+        }
+        calendar.set(Calendar.DATE,randomDate);
+//
+        System.out.println("生成的随机开始日期为"+calendar.getTime());
+        borrow.setBeginTime(calendar.getTime());
+        calendar.add(Calendar.DAY_OF_YEAR,15);
+        borrow.setLimitTime(calendar.getTime());
+//        设置结束时间，让天数随机加个3-14天
+//        先让时间再减回来
+        calendar.add(Calendar.DAY_OF_YEAR,-15);
+        calendar.add(Calendar.DAY_OF_YEAR,r.nextInt(11)+3);
+        if (!(calendar.get(Calendar.YEAR) == 2022 & calendar.get(Calendar.MONTH) == Calendar.NOVEMBER & calendar.get(Calendar.DATE) > 20)) {
+            borrow.setEndTime(calendar.getTime());
+
+        }
+        this.borrowMapper.insert(borrow);
+//        向Borrow插入一条借阅记录
+    }
+
+//    随机生成Borrow记录，添加一条未完成的，30条
+    @RequestMapping("addBorrow2")
+    public void addBorrowWithoutReturn(){
+        for (int i = 0; i < 100; i++) {
+            this.addBorrow();
+        }
+    }
+
 }

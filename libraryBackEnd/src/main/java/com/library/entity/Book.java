@@ -1,7 +1,7 @@
 package com.library.entity;
 
 import javax.persistence.Id;
-import java.sql.Date;
+import java.util.Date;
 
 public class Book {
     public Integer getId() {
@@ -74,6 +74,13 @@ public class Book {
     public void setBorrowedCount(Integer borrowedCount) {
         this.borrowedCount = borrowedCount;
     }
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
     @Override
     public String toString() {
         return "Book{" +
@@ -96,9 +103,11 @@ public class Book {
     private Integer stock;
 
 
-
     private Integer borrowedCount;
     private String publisher;
     private Date publishDate;
     private Float price;
+    private Integer type;
+
+
 }
